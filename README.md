@@ -34,7 +34,7 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 
 # Installing Tracking Plan
 
-## Adding it to your site
+## Adding it to your site
 
 Installing Trackingplan is simple, just paste this snippet top into the head of your site:
 
@@ -53,11 +53,10 @@ Note that the `init` call above should show your personal Trackingplan ID if log
 
 As soon as the snippet is deployed on your site, it will start sampling data to create your tracking plan. It does not need to load more scripts from remote servers to start working, but the sampling rate.
 
-The full snippet weights 3Kb compressed.
+- The full snippet weights 3kb compressed.
+- You can also use a Tag Manager for including the code.
 
-You can also use a Tag Manager for including the code.
-
-## Advanced Options
+## Advanced Options
 
 The `init` call can receive also an `options` dictionary, that allows you set some advanced parameters.
 
