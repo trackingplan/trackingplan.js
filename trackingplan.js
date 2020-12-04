@@ -53,8 +53,8 @@ Trackingplan.init("12345", {
             trackingplanMethod: "xhr",
             customDomains: {},
             debug: false,
-            trackingplanEndpoint: "https://tracks.trackingplan.io", // Can be overwritten.
-            trackingplanConfigEndpoint: "https://config.trackingplan.io/", // Can be overwritten.
+            trackingplanEndpoint: "https://tracks.trackingplan.com/", // Can be overwritten.
+            trackingplanConfigEndpoint: "https://config.trackingplan.com/", // Can be overwritten.
             delayConfigDownload: 5, // For testing queue and sync purposes.
             ignoreSampling: false, // For testing purposes.
         },
