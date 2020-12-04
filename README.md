@@ -28,7 +28,7 @@ Note that the used implementation is similar to the actual analytics provider cl
 
 Trackingplan does not track every single request your site sends to the analytics providers, but rather performs statistical sampling on the triggered events to provide your plan with traffic frequencies and validate its implementation. This way, your tracking plan is always updated, and you can take advantage of the inconsistencies and errors we may detect.
 
-The sampling rate is different among our clients. We store it in our server and recalculate it every day. We use a cookie to store it with a lifetime of 24 hours. This means that the sampling rate is only downloaded once per day and user. This cookie only includes the sampling rate, so it cannot be used to track your user in any manner. The name of the stored cookie is `_trackingplan_sample_rate`.
+The sampling rate is different among our clients. We store it on our server and recalculate it every day. We use a cookie to store it with a lifetime of 24 hours. This means that the sampling rate is only downloaded once per day and user. This cookie only includes the sampling rate, so it cannot be used to track your user in any manner. The name of the stored cookie is `_trackingplan_sample_rate`.
 
 Before the _sampling rate_ is downloaded, every request to Trackingplan is queued. That way, all the different events we monitor for you appear at our servers with the same probability.
 
@@ -38,7 +38,7 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 
 Installing Trackingplan is simple, just paste this snippet into the head of your site:
 
-**Warning: This minified example is only for demo purposes. Replace with latest version before distributing.**
+**Warning: This minified example is only for demo purposes. Replace it with the latest version before distributing.**
 
 ```javascript
 <script type="text/javascript">
@@ -60,7 +60,7 @@ As soon as the snippet is deployed on your site, it will start sampling data to 
 
 ### Advanced options
 
-The `init` call can receive also an `options` dictionary, that allows you to set some advanced parameters.
+The `init` call can also receive an `options` dictionary, that allows you to set some advanced parameters.
 
 | Parameter     | Description                                                                                                                                                                                                                                                                             | Default value | Example                        |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------------|
