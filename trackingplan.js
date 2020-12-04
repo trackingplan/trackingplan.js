@@ -1,10 +1,18 @@
 /**
-Trackingplan JS SDK
-v1.0.0 // TODO: Reset on launch.
+Trackingplan JS SDK For demonstration. Do not use directly on your site, use the updated and compressed version
+you get when signing up at trackingplan.com
+
+v1.0.1
+
 Usage:
-Trackingplan.init({tpId: "12345"[, environment: "TEST"] [, sourceAlias: "MyWeb"] [, debug: true]})
-or
 Trackingplan.init("12345");
+or
+Trackingplan.init("12345", {
+    [, sourceAlias: "MyWeb"]
+    [, customDomains: {"MyAnalyticsDomain.com", "MyAnalytics"}]
+    [, debug: true]
+});
+
 **/
 
 (function () {
@@ -35,8 +43,7 @@ Trackingplan.init("12345");
             "mixpanel": "mixpanel",
             "kissmetrics": "kissmetrics",
             "hull.io": "hull",
-            "hotjar": "hotjar"
-
+            "hotjar": "hotjar",
         },
 
         options: {
@@ -44,19 +51,20 @@ Trackingplan.init("12345");
             environment: "PRODUCTION",
             sourceAlias: null,
             trackingplanMethod: "xhr",
+            customDomains: {},
             debug: false,
             trackingplanEndpoint: "https://tracks.trackingplan.io", // Can be overwritten.
             trackingplanConfigEndpoint: "https://config.trackingplan.io/", // Can be overwritten.
-            delayConfigDownload: 10, // For testing queue and sync purposes.
+            delayConfigDownload: 5, // For testing queue and sync purposes.
             ignoreSampling: false, // For testing purposes.
         },
 
-        init: function (options) {
+        init: function (tpId, options={}) {
             try {
-                options = typeof options == 'string' ? { tpId: options } : options;
-
+                Object.assign(options, {tpId: tpId})
                 Object.assign(Trackingplan.options, options);
-                Trackingplan.options.debug && console.log(Trackingplan.options);
+                Object.assign(Trackingplan.providerDomains, Trackingplan.options.customDomains);
+                Trackingplan.options.debug && console.log("Trackingplan options", Trackingplan.options);
                 Trackingplan.installImageInterceptor();
                 Trackingplan.installXHRInterceptor();
                 Trackingplan.installBeaconInterceptor();
@@ -65,7 +73,7 @@ Trackingplan.init("12345");
                     setTimeout(Trackingplan.downloadSampleRate, Trackingplan.options.delayConfigDownload);
                 }
 
-                Trackingplan.options.debug && console.log("Trackingplan init finished");
+                Trackingplan.options.debug && console.log("Trackingplan init finished with options", options);
             } catch (error) {
                 console.log("Trackingplan init error: ", error);
             }
@@ -115,41 +123,40 @@ Trackingplan.init("12345");
         },
 
         processRequest: function (request) { // Decides whether or not send to trackingplan and applies data transform.
-            try {
-                function getAnalyticsProvider(endpoint) {
-                    var matches = endpoint.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
-                    var hostname = matches && matches[1]; // Domain will be null if no match is found.
-                    if (!hostname) return false;
-                    for (var domain in Trackingplan.providerDomains) {
-                        if (Trackingplan.providerDomains.hasOwnProperty(domain) && hostname.indexOf(domain) !== -1) return Trackingplan.providerDomains[domain];
+            setTimeout(function(){ // makes function non-blocking
+                try {
+                    function getAnalyticsProvider(endpoint) {
+                        var matches = endpoint.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+                        var hostname = matches && matches[1]; // Domain will be null if no match is found.
+                        if (!hostname) return false;
+                        for (var domain in Trackingplan.providerDomains) {
+                            if (Trackingplan.providerDomains.hasOwnProperty(domain) && hostname.indexOf(domain) !== -1) return Trackingplan.providerDomains[domain];
+                        }
+                        return false;
                     }
-                    return false;
-                }
 
-                var provider = getAnalyticsProvider(request.endpoint);
-                if (!provider) return;
+                    var provider = getAnalyticsProvider(request.endpoint);
+                    if (!provider) return;
 
 
-                var sampleRate = Trackingplan.getSampleRate();
-                if (!sampleRate) { // here is where we queue if we still dont have the user config downloaded.
-                    Trackingplan.queue.push(request);
-                    Trackingplan.options.debug && console.log("queue size " + Trackingplan.queue.length);
-                    return false;
-                }
+                    var sampleRate = Trackingplan.getSampleRate();
+                    if (!sampleRate) { // here is where we queue if we still dont have the user config downloaded.
+                        Trackingplan.queue.push(request);
+                        Trackingplan.options.debug && console.log("queue size " + Trackingplan.queue.length);
+                        return false;
+                    }
 
-                if (!Trackingplan.options.ignoreSampling && Math.random() >= (1 / sampleRate)) { // rolling the dice
-                    Trackingplan.options.debug && console.log("bad luck request");
+                    if (!Trackingplan.options.ignoreSampling && Math.random() >= (1 / sampleRate)) { // rolling the sampling dice
+                        Trackingplan.options.debug && console.log("bad luck request");
+                        return true;
+                    }
+
+                    Trackingplan.sendDataToTrackingplan(Trackingplan.createRawTrack(request, provider, sampleRate), Trackingplan.options.trackingplanMethod);
                     return true;
+                } catch (error) {
+                    console.error("Trackingplan process error", error, request);
                 }
-
-                // Here is where we can do blocking, renaming, etc.
-
-                Trackingplan.sendDataToTrackingplan(Trackingplan.createRawTrack(request, provider, sampleRate), Trackingplan.options.trackingplanMethod);
-                return true;
-            } catch (error) {
-                console.error("Trackingplan process error", error, request);
-            }
-
+            }, 0);
         },
 
         createRawTrack: function (request, provider, sampleRate) {
