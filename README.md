@@ -74,4 +74,4 @@ The `init` call can also receive an `options` dictionary, that allows you to set
 
 ## License
 
-Released under the [MIT license](LICENSE.md).
+Released under the [MIT license](LICENSE).
