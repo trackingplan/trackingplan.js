@@ -55,8 +55,11 @@ As soon as the snippet is deployed on your site, it will start sampling data to 
 
 ### Other details
 
-- The full snippet weights 3kb compressed.
+- The full snippet weights ~3kb compressed.
 - You can also use a Tag Manager to include the code.
+- If your site uses a Content Security Policy (CSP) you will need to:
+    - Add `config.trackingplan.com` to your `script-src` policy.
+    - Add `tracks.trackingplan.com` to your `connect-src` policy.
 
 ### Advanced options
 
@@ -67,10 +70,3 @@ The `init` call can also receive an `options` dictionary, that allows you to set
 | `sourceAlias`   | Allows to differentiate between sources                                                                                                                                                                                                                                                 | `"Javascript"`  | `"IOS App"`                      |
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
 | `debug`         | Shows Trackingplan debugging information in the console                                                                                                                                                                                                                                 | `false`         | `true`                           |
-
-
-
-
-
-
-
