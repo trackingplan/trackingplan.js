@@ -2,13 +2,13 @@
 
 # trackingplan.js
 
-# How it works
+## How it works
 
 Trackingplan works by _listening_ to the requests your JS code makes to your current analytics services. These requests are asynchronously forwarded to the Trackingplan server, where they are parsed and analyzed looking for changes and potential errors in the sent data. No data is returned to the clients (i.e. your user's web browser).
 
 The script uses a sampling mechanism to avoid sending all the generated requests. Instead, only a statistically significant amount of requests are forwarded.
 
-## Listening
+### Listening
 
 When installed, the Trackingplan SDK attaches a _listener_ to all the remote tracking requests emitted by the analytics providers. This listener works in the background as non-blocking and, therefore, does not interfere with the original request that the provider's client makes.
 
@@ -24,7 +24,7 @@ The script listens to the three most typical methods used to communicate with an
 Note that the used implementation is similar to the actual analytics provider clients, and also employed in the case of browser extensions, testing suites and debugging tools.
 
 
-## Sampling
+### Sampling
 
 Trackingplan does not track every single request your site sends to the analytics providers, but rather performs statistical sampling on the triggered events to provide your plan with traffic frequencies and validate its implementation. This way, your tracking plan is always updated, and you can take advantage of the inconsistencies and errors we may detect.
 
@@ -32,9 +32,9 @@ The sampling rate is different among our clients. We store it on our server and 
 
 Before the _sampling rate_ is downloaded, every request to Trackingplan is queued. That way, all the different events we monitor for you appear at our servers with the same probability.
 
-# Installing Trackingplan
+## Installing Trackingplan
 
-## Add the script to your site
+### Add the script to your site
 
 Installing Trackingplan is simple, just paste this snippet high in the `<head>` of your site:
 
@@ -71,3 +71,7 @@ The `init` call can also receive an `options` dictionary, that allows you to set
 | `sourceAlias`   | Allows to differentiate between sources                                                                                                                                                                                                                                                 | `"Javascript"`  | `"IOS App"`                      |
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
 | `debug`         | Shows Trackingplan debugging information in the console                                                                                                                                                                                                                                 | `false`         | `true`                           |
+
+## License
+
+Released under the [MIT license](LICENSE.md).
