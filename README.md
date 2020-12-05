@@ -36,7 +36,7 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 
 ## Add the script to your site
 
-Installing Trackingplan is simple, just paste this snippet into the head of your site:
+Installing Trackingplan is simple, just paste this snippet high in the `<head>` of your site:
 
 **Warning: This minified example is only for demo purposes. Replace it with the latest version before distributing.**
 
@@ -55,6 +55,7 @@ As soon as the snippet is deployed on your site, it will start sampling data to 
 
 ### Other details
 
+- The Trackingplan snippet should be added before other analytics snippets.
 - The full snippet weights ~3kb compressed.
 - You can also use a Tag Manager to include the code.
 - If your site uses a Content Security Policy (CSP) you will need to:
