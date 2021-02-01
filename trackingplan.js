@@ -1,9 +1,5 @@
 /**
-Trackingplan JS SDK For demonstration. Do not use directly on your site, use the updated and compressed version
-you get when signing up at trackingplan.com
-
-v1.0.1
-
+v1.2.3
 Usage:
 Trackingplan.init("12345");
 or
@@ -12,14 +8,13 @@ Trackingplan.init("12345", {
     [, customDomains: {"MyAnalyticsDomain.com", "MyAnalytics"}]
     [, debug: true]
 });
-
 **/
 
 (function () {
 
-    if (Trackingplan) { // Do not include the script twice.
-        if (window.console && console.error) {
-            console.error('Trackingplan snippet included twice.');
+    if (window.Trackingplan) { // Do not include the script twice.
+        if (window.console && console.warn) {
+            console.warn('Trackingplan snippet included twice.');
         }
         return;
     }
@@ -29,7 +24,7 @@ Trackingplan.init("12345", {
 
         sdk: "js",
 
-        sdkVersion: "1.0.0",  // TODO: Reset on launch.
+        sdkVersion: "1.2.3",  // TODO: Reset on launch.
 
         providerDomains: { // Left side could be turned into regex.
             "google-analytics.com": "googleanalytics",
@@ -59,12 +54,22 @@ Trackingplan.init("12345", {
             ignoreSampling: false, // For testing purposes.
         },
 
-        init: function (tpId, options={}) {
+
+
+        init: function (tpId, options) {
             try {
-                Object.assign(options, {tpId: tpId})
-                Object.assign(Trackingplan.options, options);
-                Object.assign(Trackingplan.providerDomains, Trackingplan.options.customDomains);
-                Trackingplan.options.debug && console.log("Trackingplan options", Trackingplan.options);
+                if(options === undefined){
+                    options = {};
+                }
+
+              	function _merge_objects(o1, o2){
+          			for (var a in o2) { o1[a] = o2[a]; }
+          			return o1;
+        		}
+
+              	Trackingplan.options['tpId'] = tpId;
+              	Trackingplan.options = _merge_objects(Trackingplan.options, options);
+    			Trackingplan.providerDomains = _merge_objects(Trackingplan.providerDomains,Trackingplan.options.customDomains);
                 Trackingplan.installImageInterceptor();
                 Trackingplan.installXHRInterceptor();
                 Trackingplan.installBeaconInterceptor();
@@ -73,9 +78,9 @@ Trackingplan.init("12345", {
                     setTimeout(Trackingplan.downloadSampleRate, Trackingplan.options.delayConfigDownload);
                 }
 
-                Trackingplan.options.debug && console.log("Trackingplan init finished with options", options);
+                Trackingplan.options.debug && console.log("TP init finished with options", options);
             } catch (error) {
-                console.log("Trackingplan init error: ", error);
+                console.warn("TP init error ", error);
             }
 
         },
@@ -142,19 +147,17 @@ Trackingplan.init("12345", {
                     var sampleRate = Trackingplan.getSampleRate();
                     if (!sampleRate) { // here is where we queue if we still dont have the user config downloaded.
                         Trackingplan.queue.push(request);
-                        Trackingplan.options.debug && console.log("queue size " + Trackingplan.queue.length);
                         return false;
                     }
 
                     if (!Trackingplan.options.ignoreSampling && Math.random() >= (1 / sampleRate)) { // rolling the sampling dice
-                        Trackingplan.options.debug && console.log("bad luck request");
                         return true;
                     }
 
                     Trackingplan.sendDataToTrackingplan(Trackingplan.createRawTrack(request, provider, sampleRate), Trackingplan.options.trackingplanMethod);
                     return true;
                 } catch (error) {
-                    console.error("Trackingplan process error", error, request);
+                    console.warn("Trackingplan process error ", error, request);
                 }
             }, 0);
         },
@@ -189,17 +192,18 @@ Trackingplan.init("12345", {
                 // The SDK version, useful for implementing different parsing strategies. It’s known by the sdk itself.
                 "sdk_version": Trackingplan.sdkVersion,
                 // The rate at which this specific track has been sampled.
-                "sampling_rate": sampleRate
+                "sampling_rate": sampleRate,
+                // Debug mode. Makes every request return and console.log the parsed track.
+                "debug": Trackingplan.options.debug
             }
 
         },
 
         sendDataToTrackingplan: function (trackingplanRawEvent, method) { // Example with cloudfront approach.
-            Trackingplan.options.debug && console.log(trackingplanRawEvent);
+            Trackingplan.options.debug && console.log("TP Sent Track", trackingplanRawEvent);
 
             function sendDataToTrackingplanWithIMG(trackingplanRawEvent) {
                 var pixel_url = Trackingplan.trackingplanEndpoint + "?data=" + encodeURIComponent(btoa(JSON.stringify(trackingplanRawEvent)));
-                Trackingplan.options.debug && console.log(pixel_url);
                 var element = document.createElement("img");
                 element.src = pixel_url;
             }
@@ -211,6 +215,13 @@ Trackingplan.init("12345", {
             function sendDataToTrackingplanWithXHR(trackingplanRawEvent, callback) {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", Trackingplan.options.trackingplanEndpoint, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        try {
+                            Trackingplan.options.debug && console.log("TP Parsed Track", JSON.parse(xhr.response));
+                        } catch (error){};
+                    }
+                  }
                 xhr.send(JSON.stringify(trackingplanRawEvent));
             }
 
@@ -229,7 +240,6 @@ Trackingplan.init("12345", {
 
         processQueue: function () { // Process all requests waiting in the queue.
             while (Trackingplan.queue.length) {
-                Trackingplan.options.debug && console.log("queue shift " + Trackingplan.queue.length);
                 var request = Trackingplan.queue.shift();
                 Trackingplan.processRequest(request);
             }
