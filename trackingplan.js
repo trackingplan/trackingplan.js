@@ -1,5 +1,6 @@
 /**
-v1.2.3
+v1.3.1
+
 Usage:
 Trackingplan.init("12345");
 or
@@ -8,6 +9,7 @@ Trackingplan.init("12345", {
     [, customDomains: {"MyAnalyticsDomain.com", "MyAnalytics"}]
     [, debug: true]
 });
+
 **/
 
 (function () {
@@ -19,12 +21,13 @@ Trackingplan.init("12345", {
         return;
     }
 
+
     var Trackingplan = window.Trackingplan = {
         queue: [],
 
         sdk: "js",
 
-        sdkVersion: "1.2.3",  // TODO: Reset on launch.
+        sdkVersion: "1.3.1",  // TODO: Reset on launch.
 
         providerDomains: { // Left side could be turned into regex.
             "google-analytics.com": "googleanalytics",
@@ -50,14 +53,17 @@ Trackingplan.init("12345", {
             debug: false,
             trackingplanEndpoint: "https://tracks.trackingplan.com/", // Can be overwritten.
             trackingplanConfigEndpoint: "https://config.trackingplan.com/", // Can be overwritten.
-            delayConfigDownload: 5, // For testing queue and sync purposes.
+            delayConfigDownload: 0, // For testing queue and sync purposes.
             ignoreSampling: false, // For testing purposes.
+            sampleRateTTL: 30 // In seconds
         },
 
 
 
         init: function (tpId, options) {
             try {
+                if(!Trackingplan.testCompat()) throw new Error("Not compatible browser");
+
                 if(options === undefined){
                     options = {};
                 }
@@ -74,15 +80,22 @@ Trackingplan.init("12345", {
                 Trackingplan.installXHRInterceptor();
                 Trackingplan.installBeaconInterceptor();
 
-                if (!Trackingplan.getSampleRate()) {
-                    setTimeout(Trackingplan.downloadSampleRate, Trackingplan.options.delayConfigDownload);
-                }
-
                 Trackingplan.options.debug && console.log("TP init finished with options", options);
             } catch (error) {
                 console.warn("TP init error ", error);
             }
 
+        },
+
+        testCompat: function () {
+            // Test localStorage
+            try {
+                localStorage.setItem("_tp_t", "a");
+                localStorage.removeItem("_tp_t");
+            } catch(e) {
+                return false;
+            }
+            return true;
         },
 
         installImageInterceptor: function () { // Intercepts DOM an Image .src and .setAttribute().
@@ -131,11 +144,8 @@ Trackingplan.init("12345", {
             setTimeout(function(){ // makes function non-blocking
                 try {
                     function getAnalyticsProvider(endpoint) {
-                        var matches = endpoint.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
-                        var hostname = matches && matches[1]; // Domain will be null if no match is found.
-                        if (!hostname) return false;
                         for (var domain in Trackingplan.providerDomains) {
-                            if (Trackingplan.providerDomains.hasOwnProperty(domain) && hostname.indexOf(domain) !== -1) return Trackingplan.providerDomains[domain];
+                            if (endpoint.indexOf(domain) !== -1) return Trackingplan.providerDomains[domain];
                         }
                         return false;
                     }
@@ -147,6 +157,8 @@ Trackingplan.init("12345", {
                     var sampleRate = Trackingplan.getSampleRate();
                     if (!sampleRate) { // here is where we queue if we still dont have the user config downloaded.
                         Trackingplan.queue.push(request);
+                        Trackingplan.options.debug && console.log("Queued, queue length = " + Trackingplan.queue.length)
+                        setTimeout(Trackingplan.downloadSampleRate, Trackingplan.options.delayConfigDownload);
                         return false;
                     }
 
@@ -245,29 +257,55 @@ Trackingplan.init("12345", {
             }
         },
 
-        sampleRateCookieName: "_trackingplan_sample_rate",
-        sampleRateCookieDays: 1,
+        sampleRateName: "_trackingplan_sample_rate",
+        sampleRateTSName: "_trackingplan_sample_rate_ts",
+
 
         getSampleRate: function () { // Reads the sample rate from cookie.
-            var b = document.cookie.match('(^|[^;]+)\\s*' + Trackingplan.sampleRateCookieName + '\\s*=\\s*([^;]+)');
-            return b ? b.pop() : '';
+            var ts = localStorage.getItem(Trackingplan.sampleRateTSName);
+            if(ts === null) return false;
+
+            if ((parseInt(ts) + Trackingplan.options.sampleRateTTL*1000) < new Date().getTime()){ // expired
+                Trackingplan.options.debug && console.log("Trackingplan sample rate expired");
+                Trackingplan.setSampleRate(false);
+                return false;
+            } else {
+                return parseInt(localStorage.getItem(Trackingplan.sampleRateName))
+            }
+
         },
 
-        setSampleRate: function (rate) { // Sets the sample rate at the cookie. Set to '' to invalidate.
-            var date = new Date();
-            date.setTime(date.getTime() + (Trackingplan.sampleRateCookieDays * 24 * 60 * 60 * 1000));
-            var expires = "; expires=" + date.toGMTString();
-            document.cookie = Trackingplan.sampleRateCookieName + "=" + rate + expires + "; path=/";
+        setSampleRate: function (rate) { // Sets the sample rate at the cookie. Set to false to invalidate.
+
+            if(rate===false){
+                localStorage.removeItem(Trackingplan.sampleRateName)
+                localStorage.removeItem(Trackingplan.sampleRateTSName)
+                return
+            }
+            Trackingplan.options.debug && console.log("Trackingplan sample rate set to "+rate)
+            localStorage.setItem(Trackingplan.sampleRateTSName, new Date().getTime())
+            localStorage.setItem(Trackingplan.sampleRateName, rate)
         },
 
-        downloadSampleRate: function () { // Includes the script that sets the cookie.
-            var head = document.head;
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.async = true;
-            script.crossorigin = "anonymous";
-            script.src = Trackingplan.options.trackingplanConfigEndpoint + "config-" + Trackingplan.options.tpId + ".js";
-            head.appendChild(script);
+        sampleRateDownloading: false,
+
+        downloadSampleRate: function() {
+            if(Trackingplan.sampleRateDownloading) return
+
+            var xmlhttp = new XMLHttpRequest();
+            var url = Trackingplan.options.trackingplanConfigEndpoint + "config-" + Trackingplan.options.tpId + ".json";
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4) {
+                    try {
+                        Trackingplan.setSampleRate(JSON.parse(this.responseText)["sample_rate"]);
+                        Trackingplan.processQueue();
+                    } catch (error){};
+                }
+                Trackingplan.sampleRateDownloading = false;
+            };
+            xmlhttp.open("GET", url, true);
+            Trackingplan.sampleRateDownloading = true;
+            xmlhttp.send();
         }
     }
 })();
