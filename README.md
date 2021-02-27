@@ -49,7 +49,7 @@ Trackingplan.init("YOUR_TP_ID");
 </script>
 ```
 
-Note that the `init` call above should show your personal Trackingplan ID if logged in, otherwise, please replace `YOUR_TP_ID` with your personal Trackingplan ID which you will find in your plan's settings page.
+Note that the `init` call above should show your personal Trackingplan ID. Please replace `YOUR_TP_ID` with your personal Trackingplan ID which you will find in your plan's settings page.
 
 As soon as the snippet is deployed on your site, it will start sampling data to create your tracking plan. It does not need to load more scripts from remote servers to start working. Only the sampling rate will be downloaded from our servers.
 
