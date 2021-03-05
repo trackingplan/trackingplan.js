@@ -1,6 +1,5 @@
 /**
 v1.3.1
-
 Usage:
 Trackingplan.init("12345");
 or
@@ -9,7 +8,6 @@ Trackingplan.init("12345", {
     [, customDomains: {"MyAnalyticsDomain.com", "MyAnalytics"}]
     [, debug: true]
 });
-
 **/
 
 (function () {
@@ -37,11 +35,9 @@ Trackingplan.init("12345", {
             "intercom.com": "intercom",
             "amplitude": "amplitude",
             "appsflyer": "appsflyer",
-            "fullstory": "fullstory",
             "mixpanel": "mixpanel",
             "kissmetrics": "kissmetrics",
-            "hull.io": "hull",
-            "hotjar": "hotjar",
+            "hull.io": "hull"
         },
 
         options: {
@@ -55,7 +51,7 @@ Trackingplan.init("12345", {
             trackingplanConfigEndpoint: "https://config.trackingplan.com/", // Can be overwritten.
             delayConfigDownload: 0, // For testing queue and sync purposes.
             ignoreSampling: false, // For testing purposes.
-            sampleRateTTL: 30 // In seconds
+            sampleRateTTL: 86400 // In seconds
         },
 
 
