@@ -29,7 +29,7 @@ Note that the used implementation is similar to the actual analytics provider cl
 
 Trackingplan does not track every single request your site sends to the analytics providers, but rather performs statistical sampling on the triggered events to provide your plan with traffic frequencies and validate its implementation. This way, your tracking plan is always updated, and you can take advantage of the inconsistencies and errors we may detect.
 
-The sampling rate is different among our clients. We recalculate it every day. We use locaStorage to store it with a lifetime of 24 hours. This means that the sampling rate is only downloaded once per day and user. This data cannot be used to track your user in any manner.
+The sampling rate is different among our clients. We recalculate it every day. We use localStorage to store it with a lifetime of 24 hours. This means that the sampling rate is only downloaded once per day and user. This data cannot be used to track your user in any manner.
 
 Before the _sampling rate_ is downloaded, every request to Trackingplan is queued. That way, all the different events we monitor for you appear at our servers with the same probability.
 
