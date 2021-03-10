@@ -390,3 +390,4 @@ Trackingplan.init("12345", {
         tpWindow.console && tpConsole.warn && tpConsole.warn(message);
     }
 })();
+
