@@ -1,5 +1,5 @@
 /**
-v1.4.0
+v1.4.1
 
 Usage:
 Trackingplan.init("12345");
@@ -87,7 +87,7 @@ Trackingplan.init("12345", {
 
         sdk: "js",
 
-        sdkVersion: "1.4.0",  // TODO: Reset on launch.
+        sdkVersion: "1.4.1",  // TODO: Reset on launch.
 
         /**
          * Default options:
@@ -109,10 +109,7 @@ Trackingplan.init("12345", {
             try {
                 if (!testCompat()) throw new Error("Not compatible browser");
 
-                function _merge_objects(o1, o2) {
-                    for (var a in o2) { o1[a] = o2[a]; }
-                    return o1;
-                }
+
 
                 _tpId = tpId;
                 _environment = options.environment || _environment;
@@ -199,12 +196,7 @@ Trackingplan.init("12345", {
     function processRequest(request) {
         setTimeout(function () { // makes function non-blocking
             try {
-                function getAnalyticsProvider(endpoint) {
-                    for (var domain in _providerDomains) {
-                        if (endpoint.indexOf(domain) !== -1) return _providerDomains[domain];
-                    }
-                    return false;
-                }
+
 
                 var provider = getAnalyticsProvider(request.endpoint);
                 if (!provider) return;
@@ -382,12 +374,27 @@ Trackingplan.init("12345", {
         }
     }
 
+
+    function _merge_objects(o1, o2) {
+        for (var a in o2) { o1[a] = o2[a]; }
+        return o1;
+    }
+
+
+    function getAnalyticsProvider(endpoint) {
+        for (var domain in _providerDomains) {
+            if (endpoint.indexOf(domain) !== -1) return _providerDomains[domain];
+        }
+        return false;
+    }
+
+
     function debugLog(message) {
         _debug && tpConsole.log(message);
     }
+
 
     function consoleWarn(message) {
         tpWindow.console && tpConsole.warn && tpConsole.warn(message);
     }
 })();
-
