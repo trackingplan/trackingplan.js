@@ -1,5 +1,5 @@
 /**
-v1.4.1
+v1.5.0
 
 Usage:
 Trackingplan.init("12345");
@@ -50,19 +50,20 @@ Trackingplan.init("12345", {
 
     var _sourceAlias = null;
 
-    // Method to send hits to tracksEndpoint
+    // Method to send hits to tracksEndpoint.
     var _sendMethod = "xhr";
 
     var _debug = false;
 
-    var _tracksEndPoint = "https://tracks.trackingplan.com/";
+    // Remember the trailing slash
+    var _tracksEndPoint = "https://tracks.trackingplan.com/v1/";
 
     var _configEndPoint = "https://config.trackingplan.com/";
 
     // For testing queue and sync purposes.
     var _delayConfigDownload = 0;
 
-    // Sample Rate Time To Live in seconds
+    // Sample Rate Time To Live in seconds.
     var _sampleRateTTL = 86400;
 
     // Sampling mode:
@@ -71,6 +72,12 @@ Trackingplan.init("12345", {
     //   all - send all tracks (debug),
     //   none: block all (debug)
     var _samplingMode = "user";
+
+    // Max batch size in bytes. Raw track is sent when the limit is reached.
+    var _batchSize = 60000; // SendBeacon to 64KB.
+
+    // The batch is sent every _batchInterval seconds.
+    var _batchInterval = 20;
 
     //
     // End of options
@@ -81,13 +88,14 @@ Trackingplan.init("12345", {
     var _isSampledUserKey = "_trackingplan_is_sampled_user";
     var _sampleRateDownloading = false;
 
-    var _queue = [];
+
+    var _preQueue = [];
+    var _postQueue = "";
 
     var Trackingplan = tpWindow.Trackingplan = {
 
         sdk: "js",
-
-        sdkVersion: "1.4.1",  // TODO: Reset on launch.
+        sdkVersion: "1.5.0",
 
         /**
          * Default options:
@@ -101,44 +109,65 @@ Trackingplan.init("12345", {
          *      configEndpoint: "https://config.trackingplan.com/",
          *      delayConfigDownload: 0,
          *      sampleRateTTL: 86400,
-         *      samplingMode: "user"
+         *      samplingMode: "user",
+         *      batchSize: 60000,
+         *      batchInterval: 20
          * }
          */
+
         init: function (tpId, options) {
             options = options || {};
             try {
                 if (!testCompat()) throw new Error("Not compatible browser");
-
-
-
                 _tpId = tpId;
                 _environment = options.environment || _environment;
                 _sourceAlias = options.sourceAlias || _sourceAlias;
                 _sendMethod = options.sendMethod || _sendMethod;
-                _providerDomains = _merge_objects(_providerDomains, options.customDomains || {});
+                _providerDomains = _mergeObjects(_providerDomains, options.customDomains || {});
                 _debug = options.debug || _debug;
                 _tracksEndPoint = options.tracksEndPoint || _tracksEndPoint;
                 _configEndPoint = options.configEndPoint || _configEndPoint;
                 _delayConfigDownload = options.delayConfigDownload || _delayConfigDownload;
                 _sampleRateTTL = options.sampleRateTTL || _sampleRateTTL;
                 _samplingMode = options.samplingMode || _samplingMode;
+                _batchSize = options.batchSize || _batchSize;
+                _batchInterval = options.batchInterval || _batchInterval;
 
                 installImageInterceptor();
                 installXHRInterceptor();
                 installBeaconInterceptor();
 
-                debugLog({message: "TP init finished with options", options: options});
+                document.addEventListener('visibilitychange', function () {
+                    if (document.visibilityState === 'hidden') {
+                        sendBatch("beacon");
+                    }
+                });
+                tpWindow.addEventListener('pagehide', function () {
+                    sendBatch("beacon");
+                });
+
+                setInterval(function () {
+                    sendBatch(_sendMethod);
+                }, _batchInterval * 1000);
+
+
+                debugLog({ m: "TP init finished", options: options });
             } catch (error) {
-                consoleWarn({message: "TP init error", error: error});
+                consoleWarn({ m: "TP init error", error: error });
             }
         }
     }
 
     function testCompat() {
-        // Test localStorage
+
         try {
+            // Test localStorage
             tpStorage.setItem("_tp_t", "a");
+            if (tpStorage.getItem("_tp_t") !== "a") return false;
             tpStorage.removeItem("_tp_t");
+            // Test sendBeacon (ie11 out)
+            if (typeof (navigator.sendBeacon) !== "function") return false;
+
         } catch (e) {
             return false;
         }
@@ -147,12 +176,10 @@ Trackingplan.init("12345", {
 
     // Intercepts DOM an Image .src and .setAttribute().
     function installImageInterceptor() {
-
         var setsrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src").set; // Copies original .src behaviour.
-
         Object.defineProperty(HTMLImageElement.prototype, "src", {
             set: function (url) {
-                processRequest({ "method": "GET", "endpoint": url, "protocol": "img" }); // If we want to block, this could be an "if".
+                processRequest({ "method": "GET", "endpoint": url, "protocol": "img" });
                 return setsrc.apply(this, arguments); // Does what original .src does.
             }
         });
@@ -203,61 +230,80 @@ Trackingplan.init("12345", {
 
                 var sampleRateDict = getSampleRateDict()
                 if (sampleRateDict === false) { // here is where we queue if we still dont have the user config downloaded.
-                    _queue.push(request);
-                    debugLog("Queued, queue length = " + _queue.length)
+                    _preQueue.push(request);
+                    debugLog({ m: "Pre queued, queue length = " + _preQueue.length })
                     setTimeout(downloadSampleRate, _delayConfigDownload);
                     return false;
                 }
 
                 if (!shouldProcessRequest(_samplingMode, sampleRateDict)) {
-                    debugLog({message: "Request ignored (sampling)", mode: _samplingMode, dict: sampleRateDict});
+                    debugLog({ m: "Request ignored (sampling)", mode: _samplingMode, dict: sampleRateDict });
                     return true;
                 }
-
-                sendDataToTrackingplan(createRawTrack(request, provider, sampleRateDict["sampleRate"]), _sendMethod);
+                queueOrSend(createRawTrack(request, provider, sampleRateDict["sampleRate"]));
                 return true;
+
             } catch (error) {
-                consoleWarn({message: "Trackingplan process error", error: error, request: request});
+                consoleWarn({ m: "Trackingplan process error", error: error, request: request });
             }
         }, 0);
     }
 
-    // Example with cloudfront approach.
-    function sendDataToTrackingplan(trackingplanRawEvent, method) {
-        debugLog({message: "TP Sent Track", rawEvent: trackingplanRawEvent});
+    function queueOrSend(rawTrack) {
+        var jsonTrack = JSON.stringify(rawTrack);
 
-        function sendDataToTrackingplanWithIMG(trackingplanRawEvent) {
-            var pixel_url = _tracksEndPoint + "?data=" + encodeURIComponent(btoa(JSON.stringify(trackingplanRawEvent)));
-            var element = document.createElement("img");
-            element.src = pixel_url;
+        if ((jsonTrack.length + 2) > _batchSize) {
+            sendDataToTrackingPlan("[" + jsonTrack + "]", _sendMethod);
+            debugLog({ m: "Track > Batch Size: " + jsonTrack.length });
+            return;
         }
 
-        function sendDataToTrackingplanWithBeacon(trackingplanRawEvent) {
-            navigator.sendBeacon(_tracksEndPoint, JSON.stringify(trackingplanRawEvent));
+        var newBatchLength = _postQueue.length + jsonTrack.length;
+        if (newBatchLength > _batchSize) {
+            debugLog({ m: "Batch reaching limit: " + newBatchLength });
+            sendBatch(_sendMethod); // sendBatch clears the _postQueue.
         }
 
-        function sendDataToTrackingplanWithXHR(trackingplanRawEvent, callback) {
+        newBatchLength = _postQueue.length + jsonTrack.length;
+        debugLog({ m: "Queue len: " + newBatchLength, "rawTrack": rawTrack });
+        if (_postQueue.length !== 0) _postQueue += ","
+        _postQueue += jsonTrack;
+    }
+
+    function sendBatch(method) {
+        if (_postQueue.length == 0) return;
+        var postQueueCopy = _postQueue;
+        _postQueue = "";
+        sendDataToTrackingPlan("[" + postQueueCopy + "]", method);
+    }
+
+    function sendDataToTrackingPlan(jsonRawEvents, method) {
+        debugLog({ m: "Sent", rawEvents: JSON.parse(jsonRawEvents) });
+
+        // developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
+        function sendDataToTrackingplanWithBeacon(jsonRawEvents) {
+            navigator.sendBeacon(_tracksEndPoint + _tpId, jsonRawEvents);
+        }
+
+        function sendDataToTrackingplanWithXHR(jsonRawEvents, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", _tracksEndPoint, true);
+            xhr.open("POST", _tracksEndPoint + _tpId, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     try {
-                        debugLog({message: "TP Parsed Track", response: JSON.parse(xhr.response)});
+                        debugLog({ m: "Parsed", response: JSON.parse(xhr.response) });
                     } catch (error) { };
                 }
             }
-            xhr.send(JSON.stringify(trackingplanRawEvent));
+            xhr.send(jsonRawEvents);
         }
 
         switch (method) {
-            case "img":
-                sendDataToTrackingplanWithIMG(trackingplanRawEvent);
-                break;
             case "xhr":
-                sendDataToTrackingplanWithXHR(trackingplanRawEvent);
+                sendDataToTrackingplanWithXHR(jsonRawEvents);
                 break;
             case "beacon":
-                sendDataToTrackingplanWithBeacon(trackingplanRawEvent);
+                sendDataToTrackingplanWithBeacon(jsonRawEvents);
                 break;
         }
     }
@@ -313,9 +359,9 @@ Trackingplan.init("12345", {
     }
 
     // Process all requests waiting in the queue.
-    function processQueue() {
-        while (_queue.length) {
-            var request = _queue.shift();
+    function processPreQueue() {
+        while (_preQueue.length) {
+            var request = _preQueue.shift();
             processRequest(request);
         }
     }
@@ -330,7 +376,7 @@ Trackingplan.init("12345", {
             if (this.readyState == 4) {
                 try {
                     setSampleRate(JSON.parse(this.responseText)["sample_rate"]);
-                    processQueue();
+                    processPreQueue();
                 } catch (error) { };
             }
             _sampleRateDownloading = false;
@@ -351,7 +397,7 @@ Trackingplan.init("12345", {
         }
         var isSampledUser = Math.random() < (1 / rate) ? 1 : 0; // rolling the sampling dice
 
-        debugLog("Trackingplan sample rate = " + rate + ". isSampledUSer " + isSampledUser)
+        debugLog({ m: "Trackingplan sample rate = " + rate + ". isSampledUser " + isSampledUser })
         tpStorage.setItem(_sampleRateTSKey, new Date().getTime())
         tpStorage.setItem(_sampleRateKey, rate)
         tpStorage.setItem(_isSampledUserKey, isSampledUser)
@@ -363,7 +409,7 @@ Trackingplan.init("12345", {
         if (ts === null) return false;
 
         if ((parseInt(ts) + _sampleRateTTL * 1000) < new Date().getTime()) { // expired
-            debugLog("Trackingplan sample rate expired");
+            debugLog({ m: "Trackingplan sample rate expired" });
             setSampleRate(false);
             return false;
         } else {
@@ -374,13 +420,6 @@ Trackingplan.init("12345", {
         }
     }
 
-
-    function _merge_objects(o1, o2) {
-        for (var a in o2) { o1[a] = o2[a]; }
-        return o1;
-    }
-
-
     function getAnalyticsProvider(endpoint) {
         for (var domain in _providerDomains) {
             if (endpoint.indexOf(domain) !== -1) return _providerDomains[domain];
@@ -388,13 +427,16 @@ Trackingplan.init("12345", {
         return false;
     }
 
-
-    function debugLog(message) {
-        _debug && tpConsole.log(message);
+    function _mergeObjects(o1, o2) {
+        for (var a in o2) { o1[a] = o2[a]; }
+        return o1;
     }
 
+    function debugLog(m) {
+        _debug && tpConsole.log("TP " + _tpId, m);
+    }
 
-    function consoleWarn(message) {
-        tpWindow.console && tpConsole.warn && tpConsole.warn(message);
+    function consoleWarn(m) {
+        tpWindow.console && tpConsole.warn && tpConsole.warn(m);
     }
 })();
