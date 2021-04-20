@@ -1,5 +1,5 @@
 /**
-v1.5.0
+v1.5.1
 
 Usage:
 Trackingplan.init("12345");
@@ -29,6 +29,7 @@ Trackingplan.init("12345", {
     // Left side could be turned into regex.
     var _providerDomains = {
         "google-analytics.com": "googleanalytics",
+        "analytics.google.com": "googleanalytics",
         "segment.com": "segment",
         "segment.io": "segment",
         "quantserve.com": "quantserve",
@@ -95,7 +96,7 @@ Trackingplan.init("12345", {
     var Trackingplan = tpWindow.Trackingplan = {
 
         sdk: "js",
-        sdkVersion: "1.5.0",
+        sdkVersion: "1.5.1",
 
         /**
          * Default options:
