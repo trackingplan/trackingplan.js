@@ -15,7 +15,7 @@ The script uses a sampling mechanism to avoid sending all the generated requests
 
 ### Add the script to your site
 
-Installing Trackingplan is simple, just paste this snippet high in the `<head>` of your site, use your tag manager o include it with `npm -i trackingplan-js`:
+Installing Trackingplan is simple, just paste this snippet high in the `<head>` of your site, use your tag manager or include it with `npm -i trackingplan-js` and initialize with `Trackingplan.init("YOUR_TP_ID")`:
 
 **Warning: This minified example is only for demo purposes and could not be updated. Replace it with the latest version before distributing.**
 
