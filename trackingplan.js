@@ -1,5 +1,5 @@
 /**
-v1.5.1
+v1.5.2
 
 Usage:
 Trackingplan.init("12345");
@@ -30,15 +30,15 @@ Trackingplan.init("12345", {
     var _providerDomains = {
         "google-analytics.com": "googleanalytics",
         "analytics.google.com": "googleanalytics",
-        "segment.com": "segment",
-        "segment.io": "segment",
+        "api.segment.io": "segment",
+        "api.segment.com": "segment",
         "quantserve.com": "quantserve",
-        "intercom.com": "intercom",
-        "amplitude": "amplitude",
-        "appsflyer": "appsflyer",
-        "mixpanel": "mixpanel",
-        "kissmetrics": "kissmetrics",
-        "hull.io": "hull"
+        "api.intercom.io": "intercom",
+        "api.amplitude.com": "amplitude",
+        "ping.chartbeat.net": "chartbeat",
+        "api.mixpanel.com": "mixpanel",
+        "kissmetrics.com": "kissmetrics",
+        "sb.scorecardresearch.com": "scorecardresearch"
     }
 
     var _tpId = null;
@@ -224,7 +224,6 @@ Trackingplan.init("12345", {
     function processRequest(request) {
         setTimeout(function () { // makes function non-blocking
             try {
-
 
                 var provider = getAnalyticsProvider(request.endpoint);
                 if (!provider) return;
