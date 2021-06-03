@@ -55,15 +55,15 @@ The sampling rate is different among our clients. We recalculate it every day. W
 Before the _sampling rate_ is downloaded, every request to Trackingplan is queued. That way, all the different events we monitor for you appear at our servers with the same probability.
 ### Other details
 
-- The Trackingplan snippet should be added before other analytics snippets.
-- The full snippet weights ~3kb compressed.
-- You can also use a Tag Manager to include the code.
-- If your site uses a Content Security Policy (CSP) you will need to:
-    - Add `config.trackingplan.com` to your `script-src` policy.
-    - Add `tracks.trackingplan.com` to your `connect-src` policy.
-– Trackingplan uses 2 variables inside your local storage, none of the identifying your users
-    _ _trackingplan_is_sampled_user (int): Stores the sample rate.
-    – _trackingplan_sample_rate_ts (int): Stores the timestamp when the sampling rate was downloaded.
+* The Trackingplan snippet should be added before other analytics snippets.
+* The full snippet weights ~3kb compressed.
+* You can also use a Tag Manager to include the code.
+* If your site uses a Content Security Policy (CSP) you will need to:
+    * Add `config.trackingplan.com` to your `script-src` policy.
+    * Add `tracks.trackingplan.com` to your `connect-src` policy.
+* Trackingplan uses 2 variables inside your local storage for internal work, none of the identifying your users:
+    * _trackingplan_is_sampled_user (int): Stores the sample rate.
+    * _trackingplan_sample_rate_ts (int): Stores the timestamp when the sampling rate was downloaded.
 ### Advanced options
 
 The `init` call can also receive an `options` dictionary, that allows you to set some advanced parameters.
