@@ -61,14 +61,18 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 - If your site uses a Content Security Policy (CSP) you will need to:
     - Add `config.trackingplan.com` to your `script-src` policy.
     - Add `tracks.trackingplan.com` to your `connect-src` policy.
-
+– Trackingplan uses 2 variables inside your local storage, none of the identifying your users
+    _ _trackingplan_is_sampled_user (int): Stores the sample rate.
+    – _trackingplan_sample_rate_ts (int): Stores the timestamp when the sampling rate was downloaded.
 ### Advanced options
 
 The `init` call can also receive an `options` dictionary, that allows you to set some advanced parameters.
 
 | Parameter     | Description                                                                                                                                                                                                                                                                             | Default value | Example                        |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------------|
+
 | `sourceAlias`   | Allows to differentiate between sources                                                                                                                                                                                                                                                 | `"Javascript"`  | `"IOS App"`                      |
+| `environment`   | Allows to isolate the data between environments                                                                                                                                                                                                                                                 | `"PRODUCTION"`  | `"DEV"`                      |
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
 | `debug`         | Shows Trackingplan debugging information in the console                                                                                                                                                                                                                                 | `false`         | `true`                           |
 
