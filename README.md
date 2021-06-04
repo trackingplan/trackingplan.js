@@ -2,13 +2,32 @@
 
 # trackingplan.js
 
-This is the code repository of the Trackingplan JavaScript SDK. If you are interested in other SDKs for a different programming language or platform, please ask the [Trackingplan team](mailto:team@trackingplan.com).
+This is the repository with the code of the Trackingplan JS SDK. If interested, ask the Trackingplan team for the source code of other SDKs like Android, iOS, Python...
 
 ## How it works
 
 Trackingplan works by _listening_ to the requests your code makes to your current analytics services. These requests are asynchronously forwarded to the Trackingplan server, where they are parsed and analyzed looking for changes and potential errors in the received data. No data is returned to the clients (i.e. your user's web browser).
 
 The script uses a sampling mechanism to avoid sending all the generated requests. Only a statistically significant amount of requests are forwarded.
+
+## Installing Trackingplan
+
+### Add the script to your site
+
+Installing Trackingplan is simple, just paste this snippet high in the `<head>` of your site, use your tag manager or include it with `npm -i trackingplan-js` and initialize with `Trackingplan.init("YOUR_TP_ID")`:
+
+**Warning: This minified example is only for demo purposes and could not be updated. Replace it with the latest version before distributing.**
+
+```javascript
+<script type="text/javascript">
+    (function(){function a(){try{q.setItem("_tp_t","a"),q.removeItem("_tp_t")}catch(a){return!1}return!0}function b(){var a=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,"src").set;Object.defineProperty(HTMLImageElement.prototype,"src",{set:function(b){return e({method:"GET",endpoint:b,protocol:"img"}),a.apply(this,arguments)}});var b=HTMLImageElement.prototype.setAttribute;HTMLImageElement.prototype.setAttribute=function(a,c){return"src"==a.toLowerCase()&&e({method:"GET",endpoint:c,protocol:"img"}),b.apply(this,arguments)}}function c(){var a=t.prototype.open,b=t.prototype.send;t.prototype.open=function(b,c){return this._tpUrl=c,this._tpMethod=b,a.apply(this,arguments)},t.prototype.send=function(a){return e({method:this._tpMethod,endpoint:this._tpUrl,payload:a,protocol:"xhr"}),b.apply(this,arguments)}}function d(){var a=navigator.sendBeacon;navigator.sendBeacon=function(b,c){return e({method:"POST",endpoint:b,payload:c,protocol:"beacon"}),a.apply(this,arguments)}}function e(a){setTimeout(function(){try{var b=n(a.endpoint);if(!b)return;var c=l();return!1===c?(G.push(a),o("Queued, queue length = "+G.length),setTimeout(j,C),!1):g(E,c)?(f(h(a,b,c.sampleRate),y),!0):(o({message:"Request ignored (sampling)",mode:E,dict:c}),!0)}catch(b){p({message:"Trackingplan process error",error:b,request:a})}},0)}function f(a,b){function c(a){var b=A+"?data="+encodeURIComponent(btoa(JSON.stringify(a))),c=document.createElement("img");c.src=b}function d(a){navigator.sendBeacon(A,JSON.stringify(a))}function e(a){var b=new XMLHttpRequest;b.open("POST",A,!0),b.onreadystatechange=function(){if(4===b.readyState)try{o({message:"TP Parsed Track",response:JSON.parse(b.response)})}catch(a){}},b.send(JSON.stringify(a))}o({message:"TP Sent Track",rawEvent:a});"img"===b?c(a):"xhr"===b?e(a):"beacon"===b?d(a):void 0}function g(a,b){switch(a){case"user":return 1===b.isSampledUser;case"track":return Math.random()<1/b.sampleRate;case"all":return!0;case"none":default:return!1;}}function h(a,b,c){return{provider:b,request:{endpoint:a.endpoint,method:a.method,post_payload:a.payload||null},context:{href:r.location.href,hostname:r.location.hostname,user_agent:navigator.userAgent},tp_id:v,source_alias:x,environment:w,sdk:H.sdk,sdk_version:H.sdkVersion,sampling_rate:c,debug:z}}function i(){for(;G.length;){var a=G.shift();e(a)}}function j(){if(!F){var a=new XMLHttpRequest,b=B+"config-"+v+".json";a.onreadystatechange=function(){if(4==this.readyState)try{k(JSON.parse(this.responseText).sample_rate),i()}catch(a){}F=!1},a.open("GET",b,!0),F=!0,a.send()}}function k(a){if(!1===a)return q.removeItem("_trackingplan_sample_rate"),q.removeItem("_trackingplan_sample_rate_ts"),void q.removeItem("_trackingplan_is_sampled_user");var b=Math.random()<1/a?1:0;o("Trackingplan sample rate = "+a+". isSampledUSer "+b),q.setItem("_trackingplan_sample_rate_ts",new Date().getTime()),q.setItem("_trackingplan_sample_rate",a),q.setItem("_trackingplan_is_sampled_user",b)}function l(){var a=q.getItem("_trackingplan_sample_rate_ts");return null!==a&&(parseInt(a)+1e3*D<new Date().getTime()?(o("Trackingplan sample rate expired"),k(!1),!1):{sampleRate:parseInt(q.getItem("_trackingplan_sample_rate")),isSampledUser:parseInt(q.getItem("_trackingplan_is_sampled_user"))})}function m(b,c){for(var d in c)b[d]=c[d];return b}function n(a){for(var b in u)if(-1!==a.indexOf(b))return u[b];return!1}function o(a){z&&s.log(a)}function p(a){r.console&&s.warn&&s.warn(a)}var q=localStorage,r=window,s=console,t=r.XMLHttpRequest;if(r.Trackingplan)return void p("Trackingplan snippet included twice.");var u={"google-analytics.com":"googleanalytics","segment.com":"segment","segment.io":"segment","quantserve.com":"quantserve","intercom.com":"intercom",amplitude:"amplitude",appsflyer:"appsflyer",mixpanel:"mixpanel",kissmetrics:"kissmetrics","hull.io":"hull"},v=null,w="PRODUCTION",x=null,y="xhr",z=!1,A="https://tracks.trackingplan.com/",B="https://config.trackingplan.com/",C=0,D=86400,E="user",F=!1,G=[],H=r.Trackingplan={sdk:"js",sdkVersion:"1.4.1",init:function(e,f){f=f||{};try{if(!a())throw new Error("Not compatible browser");v=e,w=f.environment||w,x=f.sourceAlias||x,y=f.sendMethod||y,u=m(u,f.customDomains||{}),z=f.debug||z,A=f.tracksEndPoint||A,B=f.configEndPoint||B,C=f.delayConfigDownload||C,D=f.sampleRateTTL||D,E=f.samplingMode||E,b(),c(),d(),o({message:"TP init finished with options",options:f})}catch(a){p({message:"TP init error",error:a})}}}})();
+    Trackingplan.init("YOUR_TP_ID");
+</script>
+```
+
+Note that the `init` call above should show your personal Trackingplan ID. Please replace `YOUR_TP_ID` with your personal Trackingplan ID which you will find in your plan's settings page.
+
+As soon as the snippet is deployed on your site, it will start sampling data to create your tracking plan. It does not need to load more scripts from remote servers to start working. Only the sampling rate will be downloaded from our servers.
 
 ### Listening
 
@@ -33,25 +52,6 @@ The sampling rate is different among our clients. We recalculate it every day. W
 
 Before the _sampling rate_ is downloaded, every request to Trackingplan is queued. That way, all the different events we monitor for you appear at our servers with the same probability.
 
-## Installing Trackingplan
-
-### Add the script to your site
-
-Installing Trackingplan is simple, just paste the following snippet on top of the `<head>` of your site:
-
-**Warning: This minified example is only for documentation purposes. Replace it with the latest version provided during signup before distributing.**
-
-```javascript
-<script type="text/javascript">
-    (function(){function a(){try{q.setItem("_tp_t","a"),q.removeItem("_tp_t")}catch(a){return!1}return!0}function b(){var a=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,"src").set;Object.defineProperty(HTMLImageElement.prototype,"src",{set:function(b){return e({method:"GET",endpoint:b,protocol:"img"}),a.apply(this,arguments)}});var b=HTMLImageElement.prototype.setAttribute;HTMLImageElement.prototype.setAttribute=function(a,c){return"src"==a.toLowerCase()&&e({method:"GET",endpoint:c,protocol:"img"}),b.apply(this,arguments)}}function c(){var a=t.prototype.open,b=t.prototype.send;t.prototype.open=function(b,c){return this._tpUrl=c,this._tpMethod=b,a.apply(this,arguments)},t.prototype.send=function(a){return e({method:this._tpMethod,endpoint:this._tpUrl,payload:a,protocol:"xhr"}),b.apply(this,arguments)}}function d(){var a=navigator.sendBeacon;navigator.sendBeacon=function(b,c){return e({method:"POST",endpoint:b,payload:c,protocol:"beacon"}),a.apply(this,arguments)}}function e(a){setTimeout(function(){try{var b=n(a.endpoint);if(!b)return;var c=l();return!1===c?(G.push(a),o("Queued, queue length = "+G.length),setTimeout(j,C),!1):g(E,c)?(f(h(a,b,c.sampleRate),y),!0):(o({message:"Request ignored (sampling)",mode:E,dict:c}),!0)}catch(b){p({message:"Trackingplan process error",error:b,request:a})}},0)}function f(a,b){function c(a){var b=A+"?data="+encodeURIComponent(btoa(JSON.stringify(a))),c=document.createElement("img");c.src=b}function d(a){navigator.sendBeacon(A,JSON.stringify(a))}function e(a){var b=new XMLHttpRequest;b.open("POST",A,!0),b.onreadystatechange=function(){if(4===b.readyState)try{o({message:"TP Parsed Track",response:JSON.parse(b.response)})}catch(a){}},b.send(JSON.stringify(a))}o({message:"TP Sent Track",rawEvent:a});"img"===b?c(a):"xhr"===b?e(a):"beacon"===b?d(a):void 0}function g(a,b){switch(a){case"user":return 1===b.isSampledUser;case"track":return Math.random()<1/b.sampleRate;case"all":return!0;case"none":default:return!1;}}function h(a,b,c){return{provider:b,request:{endpoint:a.endpoint,method:a.method,post_payload:a.payload||null},context:{href:r.location.href,hostname:r.location.hostname,user_agent:navigator.userAgent},tp_id:v,source_alias:x,environment:w,sdk:H.sdk,sdk_version:H.sdkVersion,sampling_rate:c,debug:z}}function i(){for(;G.length;){var a=G.shift();e(a)}}function j(){if(!F){var a=new XMLHttpRequest,b=B+"config-"+v+".json";a.onreadystatechange=function(){if(4==this.readyState)try{k(JSON.parse(this.responseText).sample_rate),i()}catch(a){}F=!1},a.open("GET",b,!0),F=!0,a.send()}}function k(a){if(!1===a)return q.removeItem("_trackingplan_sample_rate"),q.removeItem("_trackingplan_sample_rate_ts"),void q.removeItem("_trackingplan_is_sampled_user");var b=Math.random()<1/a?1:0;o("Trackingplan sample rate = "+a+". isSampledUSer "+b),q.setItem("_trackingplan_sample_rate_ts",new Date().getTime()),q.setItem("_trackingplan_sample_rate",a),q.setItem("_trackingplan_is_sampled_user",b)}function l(){var a=q.getItem("_trackingplan_sample_rate_ts");return null!==a&&(parseInt(a)+1e3*D<new Date().getTime()?(o("Trackingplan sample rate expired"),k(!1),!1):{sampleRate:parseInt(q.getItem("_trackingplan_sample_rate")),isSampledUser:parseInt(q.getItem("_trackingplan_is_sampled_user"))})}function m(b,c){for(var d in c)b[d]=c[d];return b}function n(a){for(var b in u)if(-1!==a.indexOf(b))return u[b];return!1}function o(a){z&&s.log(a)}function p(a){r.console&&s.warn&&s.warn(a)}var q=localStorage,r=window,s=console,t=r.XMLHttpRequest;if(r.Trackingplan)return void p("Trackingplan snippet included twice.");var u={"google-analytics.com":"googleanalytics","segment.com":"segment","segment.io":"segment","quantserve.com":"quantserve","intercom.com":"intercom",amplitude:"amplitude",appsflyer:"appsflyer",mixpanel:"mixpanel",kissmetrics:"kissmetrics","hull.io":"hull"},v=null,w="PRODUCTION",x=null,y="xhr",z=!1,A="https://tracks.trackingplan.com/",B="https://config.trackingplan.com/",C=0,D=86400,E="user",F=!1,G=[],H=r.Trackingplan={sdk:"js",sdkVersion:"1.4.1",init:function(e,f){f=f||{};try{if(!a())throw new Error("Not compatible browser");v=e,w=f.environment||w,x=f.sourceAlias||x,y=f.sendMethod||y,u=m(u,f.customDomains||{}),z=f.debug||z,A=f.tracksEndPoint||A,B=f.configEndPoint||B,C=f.delayConfigDownload||C,D=f.sampleRateTTL||D,E=f.samplingMode||E,b(),c(),d(),o({message:"TP init finished with options",options:f})}catch(a){p({message:"TP init error",error:a})}}}})();
-    Trackingplan.init("YOUR_TP_ID");
-</script>
-```
-
-Note that the `init` call above should show your personal Trackingplan ID. Please replace `YOUR_TP_ID` with your personal Trackingplan ID which you will find in your plan's settings page.
-
-As soon as the snippet is deployed on your site, it will start sampling data to create your tracking plan. It does not need to load more scripts from remote servers to start working. Only the sampling rate will be downloaded from our servers.
-
 ### Other important details
 
 - The Trackingplan snippet should be added before other analytics snippets.
@@ -69,14 +69,16 @@ As soon as the snippet is deployed on your site, it will start sampling data to 
    - `_trackingplan_sample_rate`: Sampling rate value 
    - `isSampledUser`: Whether sampling is done at user or at event hit level 
 
+
 ### Advanced options
 
 The `init` call can also receive an `options` dictionary, that allows you to set some advanced parameters.
 
 | Parameter     | Description                                                                                                                                                                                                                                                                             | Default value | Example                        |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------------|
-| `sourceAlias`   | Allows to differentiate between sources | `"Javascript"` | `"IOS App"` |
-| `environment`   | Allows to differentiate between production and testing environments | `"PRODUCTION"`  | `"QA"` |
+
+| `sourceAlias`   | Allows to differentiate between sources | `Javascript` | `IOS App` |
+| `environment`   | Allows to isolate the data between environments  | `PRODUCTION`  | `DEV`                         | 
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
 | `debug`         | Shows Trackingplan debugging information in the console | `false` | `true` |
 

@@ -1,0 +1,25 @@
+{
+  "name": "trackingplan-js",
+  "version": "1.5.4",
+  "description": "Javascript library for using Trackingplan in the browser.",
+  "main": "trackingplan.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trackingplan/trackingplan.js.git"
+  },
+  "keywords": [
+    "Trackingplan",
+    "Analytics",
+    "Tracking",
+    "Plan"
+  ],
+  "author": "Trackingplan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/trackingplan/trackingplan.js/issues"
+  },
+  "homepage": "https://github.com/trackingplan/trackingplan.js#readme"
+}
