@@ -2,7 +2,7 @@
 
 # trackingplan.js
 
-This is the repository with the code of the Trackingplan JS SDK. If interested, ask the Trackingplan team for the source code of other SDKs like Android, iOS, Python...
+This is the code repository of the Trackingplan JavaScript SDK. If you are interested in other SDKs for a different programming language or platform, please ask the [Trackingplan team](mailto:team@trackingplan.com).
 
 ## How it works
 
@@ -14,9 +14,14 @@ The script uses a sampling mechanism to avoid sending all the generated requests
 
 ### Add the script to your site
 
-Installing Trackingplan is simple, just paste this snippet high in the `<head>` of your site, use your tag manager or include it with `npm -i trackingplan-js` and initialize with `Trackingplan.init("YOUR_TP_ID")`:
+Installing Trackingplan is simple. Among others, we support the following methods:
+* Just paste the snippet below on top of the `<head>` of your site.
+* Use your tag manager to include the script.
+* Include the library as an npm package with `npm -i trackingplan-js`.
 
-**Warning: This minified example is only for demo purposes and could not be updated. Replace it with the latest version before distributing.**
+Once our library is included, initialize it with `Trackingplan.init("YOUR_TP_ID")` to start monitoring.
+
+**Warning: This minified example is only for documentation purposes. Replace it with the latest version provided during signup before distributing.**
 
 ```javascript
 <script type="text/javascript">
@@ -69,16 +74,14 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
    - `_trackingplan_sample_rate`: Sampling rate value 
    - `isSampledUser`: Whether sampling is done at user or at event hit level 
 
-
 ### Advanced options
 
 The `init` call can also receive an `options` dictionary, that allows you to set some advanced parameters.
 
 | Parameter     | Description                                                                                                                                                                                                                                                                             | Default value | Example                        |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------------|
-
 | `sourceAlias`   | Allows to differentiate between sources | `Javascript` | `IOS App` |
-| `environment`   | Allows to isolate the data between environments  | `PRODUCTION`  | `DEV`                         | 
+| `environment`   | Allows to isolate the data between production and testing environments | `PRODUCTION`  | `DEV` |
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
 | `debug`         | Shows Trackingplan debugging information in the console | `false` | `true` |
 
