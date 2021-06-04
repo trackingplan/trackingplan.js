@@ -15,7 +15,7 @@ The script uses a sampling mechanism to avoid sending all the generated requests
 When installed, the Trackingplan SDK attaches a _listener_ to all the remote tracking requests emitted by the analytics provider SDKs. This listener works in the background as non-blocking and, therefore, does not interfere with the original request that the provider's client makes.
 
 The technical procedure for listening to the requests is very simple: The JavaScript methods used to make the requests are wrapped by our code. In this way, when the analytics services use them to send the tracking info, two things happen:
-1. FIrst, the original action is performed (i.e. the request is sent to the analytics provider).
+1. First, the original action is performed (i.e. the request is sent to the analytics provider).
 2. In a non-blocking manner, and only if the request URL matches with a known analytics services domain, the request is fowarded to our server.
 
 The script listens to the three most typical methods used to communicate with analytics providers:
@@ -67,10 +67,8 @@ The `init` call can also receive an `options` dictionary, that allows you to set
 
 | Parameter     | Description                                                                                                                                                                                                                                                                             | Default value | Example                        |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------------|
-| `sourceAlias`   | Allows to differentiate between sources                                                                                                                                                                                                                                                 | `"Javascript"`  | `"IOS App"`                      |
-
-| `environment`   | Allows to differentiate between production and testing environments                                                                                                                                                                                                                     | `"PRODUCTION"`  | `"QA"`                      |
-|
+| `sourceAlias`   | Allows to differentiate between sources | `"Javascript"` | `"IOS App"` |
+| `environment`   | Allows to differentiate between production and testing environments | `"PRODUCTION"`  | `"QA"` |
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
 | `debug`         | Shows Trackingplan debugging information in the console                                                                                                                                                                                                                                 | `false`         | `true`                           |
 
