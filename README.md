@@ -62,8 +62,8 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
     * Add `config.trackingplan.com` to your `script-src` policy.
     * Add `tracks.trackingplan.com` to your `connect-src` policy.
 * Trackingplan uses 2 variables inside your local storage for internal work, none of the identifying your users:
-    * _trackingplan_is_sampled_user (int): Stores the sample rate.
-    * _trackingplan_sample_rate_ts (int): Stores the timestamp when the sampling rate was downloaded.
+    * `_trackingplan_is_sampled_user` (int): Stores the sample rate.
+    * `_trackingplan_sample_rate_ts` (int): Stores the timestamp when the sampling rate was downloade to know when to update it.
 ### Advanced options
 
 The `init` call can also receive an `options` dictionary, that allows you to set some advanced parameters.
