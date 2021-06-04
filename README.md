@@ -2,28 +2,28 @@
 
 # trackingplan.js
 
-This is the repository with the code of the Trackingplan JS SDK, for demo purposes. If interested, ask the Trackingplan team for the source code of other SDKs like Android, iOS, Python...
+This is the code repository of the Trackingplan JavaScript SDK. If you are interested in other SDKs for a different programming language or platform, please ask the [Trackingplan team](mailto:team@trackingplan.com).
+
 ## How it works
 
-Trackingplan works by _listening_ to the requests your code makes to your current analytics services. These requests are asynchronously forwarded to the Trackingplan server, where they are parsed and analyzed looking for changes and potential errors in the sent data. No data is returned to the clients (i.e. your user's web browser).
+Trackingplan works by _listening_ to the requests your code makes to your current analytics services. These requests are asynchronously forwarded to the Trackingplan server, where they are parsed and analyzed looking for changes and potential errors in the received data. No data is returned to the clients (i.e. your user's web browser).
 
-The script uses a sampling mechanism to avoid sending all the generated requests. Instead, only a statistically significant amount of requests are forwarded.
+The script uses a sampling mechanism to avoid sending all the generated requests. Only a statistically significant amount of requests are forwarded.
 
 ### Listening
 
-When installed, the Trackingplan SDK attaches a _listener_ to all the remote tracking requests emitted by the analytics providers. This listener works in the background as non-blocking and, therefore, does not interfere with the original request that the provider's client makes.
+When installed, the Trackingplan SDK attaches a _listener_ to all the remote tracking requests emitted by the analytics provider SDKs. This listener works in the background as non-blocking and, therefore, does not interfere with the original request that the provider's client makes.
 
 The technical procedure for listening to the requests is very simple: The JavaScript methods used to make the requests are wrapped by our code. In this way, when the analytics services use them to send the tracking info, two things happen:
-1. The original action is done (i.e. the request is sent to the analytics provider)
-2. In a non-blocking manner, and only if the request URL matches with a known analytics services domain, the Trackingplan payload is composed and sent to our server.
+1. FIrst, the original action is performed (i.e. the request is sent to the analytics provider).
+2. In a non-blocking manner, and only if the request URL matches with a known analytics services domain, the request is fowarded to our server.
 
 The script listens to the three most typical methods used to communicate with analytics providers:
 - XHR: by wrapping the `XMLHttpRequest.open` and `XMLHttpRequest.send` functions
 - Pixels: by wrapping the `HTMLImageElement.prototype.setAttribute` function
 - Beacons: by wrapping the `navigator.sendBeacon` function
 
-Note that the used implementation is similar to the actual analytics provider clients, and also employed in the case of browser extensions, testing suites and debugging tools.
-
+Note that the used implementation is similar to the one used in the actual analytics provider clients, and also employed in the case of browser extensions, testing suites and debugging tools.
 
 ### Sampling
 
@@ -37,9 +37,9 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 
 ### Add the script to your site
 
-Installing Trackingplan is simple, just paste this snippet high in the `<head>` of your site:
+Installing Trackingplan is simple, just paste the following snippet on top of the `<head>` of your site:
 
-**Warning: This minified example is only for demo purposes. Replace it with the latest version before distributing.**
+**Warning: This minified example is only for documentation purposes. Replace it with the latest version provided during signup before distributing.**
 
 ```javascript
 <script type="text/javascript">
@@ -52,11 +52,11 @@ Note that the `init` call above should show your personal Trackingplan ID. Pleas
 
 As soon as the snippet is deployed on your site, it will start sampling data to create your tracking plan. It does not need to load more scripts from remote servers to start working. Only the sampling rate will be downloaded from our servers.
 
-### Other details
+### Other important details
 
 - The Trackingplan snippet should be added before other analytics snippets.
 - The full snippet weights ~3kb compressed.
-- You can also use a Tag Manager to include the code.
+- You can also use a Tag Manager (e.g. Google Tag Manager) to include the code.
 - If your site uses a Content Security Policy (CSP) you will need to:
     - Add `config.trackingplan.com` to your `script-src` policy.
     - Add `tracks.trackingplan.com` to your `connect-src` policy.
@@ -68,9 +68,12 @@ The `init` call can also receive an `options` dictionary, that allows you to set
 | Parameter     | Description                                                                                                                                                                                                                                                                             | Default value | Example                        |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------------|
 | `sourceAlias`   | Allows to differentiate between sources                                                                                                                                                                                                                                                 | `"Javascript"`  | `"IOS App"`                      |
+
+| `environment`   | Allows to differentiate between production and testing environments                                                                                                                                                                                                                     | `"PRODUCTION"`  | `"QA"`                      |
+|
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
 | `debug`         | Shows Trackingplan debugging information in the console                                                                                                                                                                                                                                 | `false`         | `true`                           |
 
 ## License
 
-Released under the [MIT license](LICENSE).
+Released under the [MIT License](LICENSE).
