@@ -61,6 +61,14 @@ As soon as the snippet is deployed on your site, it will start sampling data to 
     - Add `config.trackingplan.com` to your `script-src` policy.
     - Add `tracks.trackingplan.com` to your `connect-src` policy.
 
+### Cookies and local storage
+
+- This script does not use any browser cookie.
+- localStore is employed to save the sampling rate mentioned above with the following keys:
+   - `_trackingplan_sample_rate_ts`: Timestamp of the last time the sampling rate was downloaded
+   - `_trackingplan_sample_rate`: Sampling rate value 
+   - `isSampledUser`: Whether sampling is done at user or at event hit level 
+
 ### Advanced options
 
 The `init` call can also receive an `options` dictionary, that allows you to set some advanced parameters.
@@ -70,7 +78,7 @@ The `init` call can also receive an `options` dictionary, that allows you to set
 | `sourceAlias`   | Allows to differentiate between sources | `"Javascript"` | `"IOS App"` |
 | `environment`   | Allows to differentiate between production and testing environments | `"PRODUCTION"`  | `"QA"` |
 | `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
-| `debug`         | Shows Trackingplan debugging information in the console                                                                                                                                                                                                                                 | `false`         | `true`                           |
+| `debug`         | Shows Trackingplan debugging information in the console | `false` | `true` |
 
 ## License
 
