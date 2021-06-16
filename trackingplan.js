@@ -1,5 +1,5 @@
 /**
-v1.5.6
+v1.5.7
 
 Usage:
 Trackingplan.init("12345");
@@ -421,8 +421,10 @@ Trackingplan.init("12345", {
     }
 
     function getAnalyticsProvider(endpoint) {
-        for (var domain in _providerDomains) {
-            if (endpoint.indexOf(domain) !== -1) return _providerDomains[domain];
+        if (typeof endpoint === "string" || endpoint instanceof String){
+            for (var domain in _providerDomains) {
+                if (endpoint.indexOf(domain) !== -1) return _providerDomains[domain];
+            }
         }
         return false;
     }
