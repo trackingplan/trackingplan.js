@@ -51,9 +51,9 @@ Note that the used implementation is similar to the one used in the actual analy
 
 ### Sampling
 
-Trackingplan does not track every single request your site sends to the analytics providers, but rather performs statistical sampling on the triggered events to provide your plan with traffic frequencies and validate its implementation. This way, your tracking plan is always updated, and you can take advantage of the inconsistencies and errors we may detect.
+Trackingplan does not track every single request your site sends to the analytics providers, but rather performs statistical sampling on your users to provide your plan with traffic frequencies and validate its implementation. This way, your tracking plan is always updated, and you can take advantage of the inconsistencies and errors we may detect.
 
-The sampling rate is different among our clients. We recalculate it every day. We use localStorage to store it with a lifetime of 24 hours. This means that the sampling rate is only downloaded once per day and user. This data cannot be used to track your user in any manner.
+The *user sampling rate* of your plan is set by us based on your traffic and downloaded only once per day and user. This data cannot be used to track your user in any manner.
 
 Before the _sampling rate_ is downloaded, every request to Trackingplan is queued. That way, all the different events we monitor for you appear at our servers with the same probability.
 
@@ -72,7 +72,7 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 - localStore is employed to save the sampling rate mentioned above with the following keys:
    - `_trackingplan_sample_rate_ts`: Timestamp of the last time the sampling rate was downloaded
    - `_trackingplan_sample_rate`: Sampling rate value 
-   - `isSampledUser`: Whether sampling is done at user or at event hit level 
+   - `isSampledUser`: Whether data is being collected for this user
 
 ### Advanced options
 
