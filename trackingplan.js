@@ -1,5 +1,5 @@
 /**
-v1.5.4
+v1.5.6
 
 Usage:
 Trackingplan.init("12345");
