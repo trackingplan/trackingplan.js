@@ -6,7 +6,7 @@ Trackingplan.init("12345");
 or
 Trackingplan.init("12345", {
     [, sourceAlias: "MyWeb"]
-    [, customDomains: {"MyAnalyticsDomain.com": "MyAnalytics"}]
+    [, customDomains: {"MyAnalyticsDomain.com": "MyAnalytics"[, ...]}]
     [, debug: true]
 });
 
