@@ -1,12 +1,12 @@
 /**
-v1.5.7
+v1.6.0
 
 Usage:
 Trackingplan.init("12345");
 or
 Trackingplan.init("12345", {
     [, sourceAlias: "MyWeb"]
-    [, customDomains: {"MyAnalyticsDomain.com", "MyAnalytics"}]
+    [, customDomains: {"MyAnalyticsDomain.com": "MyAnalytics"[, ...]}]
     [, debug: true]
 });
 
@@ -71,7 +71,7 @@ Trackingplan.init("12345", {
     //   user - Per user,
     //   track - per track,
     //   all - send all tracks (debug),
-    //   none: block all (debug)
+    //   none - block all (debug)
     var _samplingMode = "user";
 
     // Max batch size in bytes. Raw track is sent when the limit is reached.
@@ -79,6 +79,9 @@ Trackingplan.init("12345", {
 
     // The batch is sent every _batchInterval seconds.
     var _batchInterval = 20;
+
+    // Dont send context data (href, host, user_agent) with the raw tracks
+    var _ignoreContext = false;
 
     //
     // End of options
@@ -112,7 +115,8 @@ Trackingplan.init("12345", {
          *      sampleRateTTL: 86400,
          *      samplingMode: "user",
          *      batchSize: 60000,
-         *      batchInterval: 20
+         *      batchInterval: 20,
+         *      ignoreContext: false
          * }
          */
 
@@ -133,6 +137,7 @@ Trackingplan.init("12345", {
                 _samplingMode = options.samplingMode || _samplingMode;
                 _batchSize = options.batchSize || _batchSize;
                 _batchInterval = options.batchInterval || _batchInterval;
+                _ignoreContext = options.ignoreContext || _ignoreContext;
 
                 installImageInterceptor();
                 installXHRInterceptor();
@@ -335,12 +340,12 @@ Trackingplan.init("12345", {
                 // The payload, in its original form. If it’s a POST request, the raw payload, if it’s a GET, the querystring (are there other ways?).
                 "post_payload": request.payload || null,
             },
-            "context": {
+            "context": !_ignoreContext ? {
                 "href": tpWindow.location.href,
                 "hostname": tpWindow.location.hostname,
                 "user_agent": navigator.userAgent
                 // Information that is extracted in run time that can be useful. IE. UserAgent, URL, etc. it varies depending on the platform. Can we standardize it?
-            },
+            } : {},
             // A key that identifies the customer. It’s written by the developer on the SDK initialization.
             "tp_id": _tpId,
             // An optional alias that identifies the source. It’s written by the developer on the SDK initialization.

@@ -71,7 +71,7 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 - This script does not use any browser cookie.
 - localStore is employed to save the sampling rate mentioned above with the following keys:
    - `_trackingplan_sample_rate_ts`: Timestamp of the last time the sampling rate was downloaded
-   - `_trackingplan_sample_rate`: Sampling rate value 
+   - `_trackingplan_sample_rate`: Sampling rate value
    - `isSampledUser`: Whether data is being collected for this user
 
 ### Advanced options
@@ -82,7 +82,7 @@ The `init` call can also receive an `options` dictionary, that allows you to set
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------------|
 | `sourceAlias`   | Allows to differentiate between sources | `Javascript` | `IOS App` |
 | `environment`   | Allows to isolate the data between production and testing environments | `PRODUCTION`  | `DEV` |
-| `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `[{"myAnalyticsDomain.com", "myAnalytics"}]`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `[{"mixpanel.com", "Mixpanel"}]` |
+| `customDomains` | Allows to extend the list of monitored domains. Any request made to these domains will also be forwarded to Trackingplan. The format is `{"myAnalyticsDomain.com": "myAnalytics"}`, where you put, respectively, the domain to be looked for and the alias you want to use for that analytics domain. | `{}`            | `{"mixpanel.com": "Mixpanel"}` |
 | `debug`         | Shows Trackingplan debugging information in the console | `false` | `true` |
 
 ## License
