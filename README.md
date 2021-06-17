@@ -72,7 +72,7 @@ Before the _sampling rate_ is downloaded, every request to Trackingplan is queue
 - localStore is employed to save the sampling rate mentioned above with the following keys:
    - `_trackingplan_sample_rate_ts`: Timestamp of the last time the sampling rate was downloaded
    - `_trackingplan_sample_rate`: Sampling rate value
-   - `isSampledUser`: Whether data is being collected for this user
+   - `_trackingplan_is_sampled_user`: Whether data is being collected for this user
 
 ### Advanced options
 
