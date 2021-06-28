@@ -1,5 +1,5 @@
 /**
-v1.6.0
+v1.6.1
 
 Usage:
 Trackingplan.init("12345");
@@ -99,7 +99,7 @@ Trackingplan.init("12345", {
     var Trackingplan = tpWindow.Trackingplan = {
 
         sdk: "js",
-        sdkVersion: "1.5.1",
+        sdkVersion: "1.6.1",
 
         /**
          * Default options:
