@@ -101,7 +101,7 @@ Trackingplan.init("12345", {
     var Trackingplan = tpWindow.Trackingplan = {
 
         sdk: "js",
-        sdkVersion: "1.6.2",
+        sdkVersion: "1.7.0",
         listening: false, 
 
         /**
