@@ -1,5 +1,5 @@
 /**
-v1.6.1
+v1.7.0
 
 Usage:
 Trackingplan.init("12345");
@@ -27,7 +27,7 @@ Trackingplan.init("12345", {
     }
 
     // Left side could be turned into regex.
-    var _providerDomains = {
+    var _defaultProviderDomains = {
         "google-analytics.com": "googleanalytics",
         "analytics.google.com": "googleanalytics",
         "api.segment.io": "segment",
@@ -40,6 +40,8 @@ Trackingplan.init("12345", {
         "kissmetrics.com": "kissmetrics",
         "sb.scorecardresearch.com": "scorecardresearch"
     }
+
+    var _providerDomains = {}
 
     var _tpId = null;
 
@@ -99,7 +101,8 @@ Trackingplan.init("12345", {
     var Trackingplan = tpWindow.Trackingplan = {
 
         sdk: "js",
-        sdkVersion: "1.6.1",
+        sdkVersion: "1.6.2",
+        listening: false, 
 
         /**
          * Default options:
@@ -121,6 +124,7 @@ Trackingplan.init("12345", {
          */
 
         init: function (tpId, options) {
+
             options = options || {};
             try {
                 if (!testCompat()) throw new Error("Not compatible browser");
@@ -128,7 +132,7 @@ Trackingplan.init("12345", {
                 _environment = options.environment || _environment;
                 _sourceAlias = options.sourceAlias || _sourceAlias;
                 _sendMethod = options.sendMethod || _sendMethod;
-                _providerDomains = _mergeObjects(_providerDomains, options.customDomains || {});
+                _providerDomains = _mergeObjects(_defaultProviderDomains, options.customDomains || {});
                 _debug = options.debug || _debug;
                 _tracksEndPoint = options.tracksEndPoint || _tracksEndPoint;
                 _configEndPoint = options.configEndPoint || _configEndPoint;
@@ -138,26 +142,31 @@ Trackingplan.init("12345", {
                 _batchSize = options.batchSize || _batchSize;
                 _batchInterval = options.batchInterval || _batchInterval;
                 _ignoreContext = options.ignoreContext || _ignoreContext;
+                
+                if(Trackingplan.listening === false){
+                    installImageInterceptor();
+                    installXHRInterceptor();
+                    installBeaconInterceptor();
 
-                installImageInterceptor();
-                installXHRInterceptor();
-                installBeaconInterceptor();
-
-                document.addEventListener('visibilitychange', function () {
-                    if (document.visibilityState === 'hidden') {
+                    document.addEventListener('visibilitychange', function () {
+                        if (document.visibilityState === 'hidden') {
+                            sendBatch("beacon");
+                        }
+                    });
+                    tpWindow.addEventListener('pagehide', function () {
                         sendBatch("beacon");
-                    }
-                });
-                tpWindow.addEventListener('pagehide', function () {
-                    sendBatch("beacon");
-                });
+                    });
 
-                setInterval(function () {
-                    sendBatch(_sendMethod);
-                }, _batchInterval * 1000);
+                    setInterval(function () {
+                        sendBatch(_sendMethod);
+                    }, _batchInterval * 1000);
 
-
-                debugLog({ m: "TP init finished", options: options });
+                    Trackingplan.listening = true;
+                    debugLog({ m: "TP init finished", options: options });    
+                } else {
+                    debugLog({ m: "TP options updated", options: options });
+                }
+                
             } catch (error) {
                 consoleWarn({ m: "TP init error", error: error });
             }
